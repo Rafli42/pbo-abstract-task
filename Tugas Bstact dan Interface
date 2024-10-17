@@ -1,0 +1,131 @@
+using System;
+using System.Collections.Generic;
+
+public abstract class Robot
+{
+    public string Nama { get; }
+    public int Energi { get; protected set; }
+    public int Serangan { get; protected set; }
+
+    protected Robot(string nama, int energi, int serangan)
+    {
+        Nama = nama;
+        Energi = energi;
+        Serangan = serangan;
+    }
+
+    public abstract void GunakanKemampuan(Robot target);
+
+    public void Serang(Robot target)
+    {
+        Console.WriteLine($"{Nama} menyerang {target.Nama}!");
+        target.TerimaKerusakan(Serangan);
+    }
+
+    public void TerimaKerusakan(int jumlah)
+    {
+        Energi -= jumlah;
+        Console.WriteLine($"{Nama} menerima {jumlah} kerusakan. Energi tersisa: {Energi}");
+    }
+
+    public virtual void CetakStatus()
+    {
+        Console.WriteLine($"Robot: {Nama}, Energi: {Energi}, Serangan: {Serangan}");
+    }
+
+    public bool MasihHidup()
+    {
+        return Energi > 0;
+    }
+}
+
+public class RobotBiasa : Robot
+{
+    public RobotBiasa(string nama, int energi, int serangan) : base(nama, energi, serangan)
+    {
+    }
+
+    public override void GunakanKemampuan(Robot target)
+    {
+        Console.WriteLine($"{Nama} menggunakan serangan kuat!");
+        int seranganKuat = Serangan + 5;  // Tambahan serangan
+        target.TerimaKerusakan(seranganKuat);
+    }
+}
+
+public class RobotKhusus : Robot
+{
+    public RobotKhusus(string nama, int energi, int serangan) : base(nama, energi, serangan)
+    {
+    }
+
+    public override void GunakanKemampuan(Robot target)
+    {
+        Console.WriteLine($"{Nama} menggunakan kemampuan spesial: Pemulihan!");
+        int pemulihan = 10;
+        Energi += pemulihan;
+        Console.WriteLine($"{Nama} memulihkan {pemulihan} energi. Energi sekarang: {Energi}");
+    }
+}
+
+public class Pertarungan
+{
+    private Robot robot1;
+    private Robot robot2;
+
+    public Pertarungan(Robot r1, Robot r2)
+    {
+        robot1 = r1;
+        robot2 = r2;
+    }
+
+    public void Mulai()
+    {
+        Console.WriteLine("Pertarungan dimulai!");
+        int ronde = 1;
+
+        while (robot1.MasihHidup() && robot2.MasihHidup())
+        {
+            Console.WriteLine($"\n=== Ronde {ronde} ===");
+
+            // Robot 1 menyerang
+            robot1.Serang(robot2);
+            if (!robot2.MasihHidup())
+            {
+                Console.WriteLine($"{robot2.Nama} telah dikalahkan!");
+                break;
+            }
+
+            // Robot 2 menggunakan kemampuan
+            robot2.GunakanKemampuan(robot1);
+            if (!robot1.MasihHidup())
+            {
+                Console.WriteLine($"{robot1.Nama} telah dikalahkan!");
+                break;
+            }
+
+            // Cetak status kedua robot setelah ronde
+            Console.WriteLine("\nStatus setelah ronde:");
+            robot1.CetakStatus();
+            robot2.CetakStatus();
+
+            ronde++;
+        }
+
+        Console.WriteLine("Pertarungan berakhir!");
+    }
+}
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Membuat dua robot
+        Robot robotBiasa = new RobotBiasa("R2D2", 100, 15);
+        Robot robotKhusus = new RobotKhusus("C3PO", 120, 10);
+
+        // Memulai pertarungan
+        Pertarungan pertarungan = new Pertarungan(robotBiasa, robotKhusus);
+        pertarungan.Mulai();
+    }
+}
